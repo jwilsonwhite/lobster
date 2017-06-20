@@ -202,7 +202,11 @@ if isnan(MP); MP=0; end % this happens if the population has declined to within 
     % To do this, assemble a series of connectivity matrices with eggs-per-recruit. Do
     % this only for the part of the simulation before DD was removed
     Eggs = mean(E(:,Tdd-Lag-(1:Lag)-2),2);
+    if size(Eggs)>1 % if there is more than one polygon in this nation
     Rec = mean(squeeze(N(1,:,Tdd-Lag-(1:Lag)-2)),2); % eggs per recruit
+    else
+    Rec = mean(N(1,1,Tdd-Lag-(1:Lag)-2));
+    end
     EPR = Eggs./Rec;
     EPR(isnan(EPR)) =0;
     EPR(isinf(EPR)) =0;
