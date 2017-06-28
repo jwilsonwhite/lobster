@@ -7,26 +7,40 @@ function runme_lobster(F,type)
 % type: 1 = average matrix (averaged over 3 years; deterministic run); 2 = use individual
 % years (stochastic run)
 
-savename = 'lobster_scenario1_testingJun2017.mat';
+savename = 'lobster_scenario2_june19_ecoregions_F0.mat';
+
 % Adjust this to keep track of the runs you make. This file will store the
 % parameters, matrices, and model results for a particular run.
 
-Subnetworks = {[1,2,4],... % mesoamerica
-               [10,12],... % N Cuba, Bahamas
-               [12,13],... %Cuba
-               [13, 14, 3],...; % S Cuba, Jamaica, Cayman
-               [9,17],... % USA
-               [18,23,25,34,35],... % netherlands
-               [18:27],...  % leeward islands
-               [28:33],...    % windward islands
-               [18:33]}; % leeward + windward
+% Subnetworks = {[1,2,4],... % mesoamerica
+%                [5,6,7],... %nicaragua, panama, costa rica
+%                [10,12],... % N Cuba, Bahamas
+%                [12,13],... %Cuba
+%                [13, 14, 3],...; % S Cuba, Jamaica, Cayman
+%                [9,17],... % USA
+%                [18,24,34,35],... % netherlands
+%                [18,20:23,25:27,33],...  % leeward islands
+%                [19,28:32],...    % windward islands
+%                [18:23,25:33]}; % leeward + windward
 
+%%ecoregion
+Subnetworks = {[38,37,36,30,26],... % southern caribbean
+               [15,16,17,18,19,4],... %greater antilles
+               [13,14],... % bahamian
+               [12],... %northern gulf of mexico
+               [2],...; % southern GOM
+               [11],... % florida
+               [1,3,6],... % western caribbean
+               [5,7,8,9,10],... %southwestern caribbean
+               [20:25,27:29,31:35]}; % eastern caribbean
+           
+           
 Params = setup_params; 
 % this code will create all of the necessary life history parameters.
 % It will return a structure file (Params) that can be passed to other
 % functions
 
-%type = 1;
+type = 2;
 Connmat = load_connmat(type); % Type = 1 (1 average matrix) or 2 (3 separate years)
 % Load in the connectivity matrix (may need to add in possibility of
 % different alternatives here, e.g., overall mean vs. multiple years.
@@ -62,7 +76,7 @@ load_habitat;
 % (F_MSY), and F = 1.0 (highly overexploited)
 
 
-Fvec = F*ones(4921,1); %Fvec = F*ones(4921,1)
+Fvec = 0*ones(2930,1); %Fvec = F*ones(4921,1)
 % Fvec will be a p x 1 vector giving the fishing rate in each patch. This
 % should be an annual instantaneous rate (units year^-1). If you have
 % something like proportion of stock harvested, then we can discuss how to
@@ -76,7 +90,7 @@ else
 Params.eig = max(eig(mean(Connmat,3))); 
 end
 
-[SP, CM, NP] = calculate_persistence(Params, Connmat, Nation, Fvec, Hab,Subnetworks);
+%[SP, CM, NP] = calculate_persistence(Params, Connmat, Nation, Fvec, Hab,Subnetworks);
 % This code will take the variables loaded in above and makes long-term,
 % deterministic calculations about self-persistence (which nations are
 % self-persistent), network persistence, and source-sink linkages, etc.
@@ -93,10 +107,11 @@ end
 % The output NP gives the network persistence for each set of nations in
 % Subnetworks
 
-if type == 1
-% If we are using a single deterministic Connmat, we can make all of the
-% calculations in one step using the eigenvalue approach.
-[N,Neq,CM,CMn,MP,SP,SR,LR,NP] = run_model(Params, Connmat, Hab, Nation, Fvec, Subnetworks);
+ if type == 1
+% %mean Connmat and dynamic fishing
+% % If we are using a single deterministic Connmat, we can make all of the
+% % calculations in one step using the eigenvalue approach.
+% [N,Neq,CM,CMn,MP,SP,SR,LR,NP] = run_model(Params, Connmat, Hab, Nation, Fvec, Subnetworks);
 
 % This code will run a dynamic model. This can handle year-to-year
 % variation in connectivity, as well as a dynamic fishing fleet (i.e., the
@@ -119,10 +134,10 @@ if type == 1
 % NP2: Network persistence (if Subnetworks are provided)
 
 
-elseif type ==2 % If multiple Connmats are used, the model is stochastic and an alternative set of calculations are necessary
+elseif type == 2 % If multiple Connmats are used, the model is stochastic and an alternative set of calculations are necessary
     
 % Overall simulation:    (this takes a while, so I recommend using %% to comment this out if you want to just look at self-persistent patterns) 
-[N,Neq,CM,CMn,MP,~,SR,LR,~,BC] = run_model(Params, Connmat, Hab, Nation, Fvec, Subnetworks);    
+[N,Neq,CM,CMn,MP,MP,SR,LR,NP,BC] = run_model(Params, Connmat, Hab, Nation, Fvec, Subnetworks);    
     
 % With a stochastic matrix, we cannot calculate persistence directly from
 % the eigenvalues, because they vary from year to year. Instead, estimate long-term 
@@ -169,12 +184,12 @@ end % end if Type 1 or 2
 
 save(savename) % Save all the results
 
-keyboard % can delete this if you don't want to enter debug mode here.
+%keyboard % can delete this if you don't want to enter debug mode here.
 
 % To plot the connectivity matrix:
-CMn_tmp = CMn;
+%CMn_tmp = CMn;
 % Add NaNs to the edges so that all values are plotted
-CMn_tmp(:,end+1) = NaN; CMn_tmp(end+1,:)=NaN;
+%CMn_tmp(:,end+1) = NaN; CMn_tmp(end+1,:)=NaN;
 
 % Make the plot:
 %figure(1)

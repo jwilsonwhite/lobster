@@ -54,7 +54,7 @@ LEP = sum(exp(-Params.M.*(Params.A-1)).*Params.Fec);
 % Calculate FLEP: how LEP is reduced (proportionately) by harvest:
 Fs = 0:0.01:2; % assume a harvest rate of 2 year^-1 is super high
 FLEP = zeros(size(Fs));
-for f = 1:length(Fs) %was length(F) before, check if the edit is correct 
+for f = 1:length(Fs)
     LEP1 = (exp(-Params.M.*(Params.A(Params.A<Params.Lf)-1)).*Params.Fec(Params.A<Params.Lf));
     LEP2 = exp(-Params.M*(Params.Lf-2)).*(exp(-(Params.M+Fs(f)).*(1:Params.Maxage-(Params.Lf-1))).*Params.Fec(Params.A>=Params.Lf));
     FLEP(f) = sum(LEP1) + sum(LEP2);
